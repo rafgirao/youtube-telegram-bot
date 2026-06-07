@@ -72,6 +72,10 @@ if _cookies_b64 and not COOKIES_FILE:
 # player_client alternativos (ex.: "android,ios,web"). Vazio = padrão do yt-dlp.
 YT_PLAYER_CLIENT = os.getenv("YT_PLAYER_CLIENT", "").replace(" ", "")
 
+# Proxy (IP residencial) para driblar o bloqueio do YouTube em IPs de datacenter.
+# Ex.: http://usuario:senha@host:porta  ou  socks5://usuario:senha@host:porta
+YT_PROXY = os.getenv("YT_PROXY", "").strip()
+
 # Guarda a URL pendente por usuário entre o envio do link e a escolha da qualidade.
 PENDING: dict[int, str] = {}
 
@@ -81,6 +85,8 @@ def _base_opts() -> dict:
     opts = {"quiet": True, "no_warnings": True, "noplaylist": True}
     if COOKIES_FILE:
         opts["cookiefile"] = COOKIES_FILE
+    if YT_PROXY:
+        opts["proxy"] = YT_PROXY
     if YT_PLAYER_CLIENT:
         opts["extractor_args"] = {
             "youtube": {"player_client": YT_PLAYER_CLIENT.split(",")}

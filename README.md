@@ -28,7 +28,20 @@ uma **allowlist de usuários**. Pronto para deploy no **EasyPanel** via Docker.
 | `YOUTUBE_COOKIES_B64` | em VPS | Cookies do YouTube em base64 (ver abaixo) |
 | `COOKIES_FILE` | alternativa | Caminho de um `cookies.txt` montado |
 | `YT_PLAYER_CLIENT` | não | Forçar clients, ex.: `android,ios,web` |
+| `YT_PROXY` | alternativa | Proxy residencial p/ driblar bloqueio (cobra por GB) |
 | `DOWNLOAD_DIR` | não | Pasta temporária (default `/tmp/dl`) |
+
+### Alternativa aos cookies: proxy residencial
+
+Em vez de cookies, dá para rotear o tráfego por um **IP residencial** (provedores:
+Webshare, IPRoyal, Smartproxy, Bright Data). Não precisa de conta do YouTube, mas
+⚠️ **cobra por GB de tráfego** — e vídeo consome muita banda. Configure:
+
+```
+YT_PROXY=http://usuario:senha@host:porta
+```
+
+Suporta `http://`, `https://` e `socks5://`. Pode ser combinado com cookies.
 
 ## Cookies do YouTube (obrigatório em VPS)
 

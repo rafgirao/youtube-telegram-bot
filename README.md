@@ -25,7 +25,26 @@ uma **allowlist de usuários**. Pronto para deploy no **EasyPanel** via Docker.
 | `MAX_HEIGHT` | não | Altura máxima oferecida (default `720`) |
 | `TELEGRAM_API_BASE_URL` | não | URL do Bot API local (ativa limite de 2 GB) |
 | `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` | só p/ server local | De [my.telegram.org](https://my.telegram.org) |
+| `YOUTUBE_COOKIES_B64` | em VPS | Cookies do YouTube em base64 (ver abaixo) |
+| `COOKIES_FILE` | alternativa | Caminho de um `cookies.txt` montado |
+| `YT_PLAYER_CLIENT` | não | Forçar clients, ex.: `android,ios,web` |
 | `DOWNLOAD_DIR` | não | Pasta temporária (default `/tmp/dl`) |
+
+## Cookies do YouTube (obrigatório em VPS)
+
+O YouTube bloqueia downloads de IPs de datacenter com *"Sign in to confirm you're not
+a bot"*. A solução é fornecer cookies de uma conta logada (**use uma conta descartável**).
+
+1. No navegador, instale a extensão **"Get cookies.txt LOCALLY"** (Chrome/Firefox).
+2. Logue numa conta Google/YouTube descartável e exporte `cookies.txt` (formato Netscape).
+3. Converta para base64 e use em `YOUTUBE_COOKIES_B64`:
+   ```bash
+   base64 -w0 cookies.txt   # Linux
+   base64 -i cookies.txt    # macOS
+   ```
+4. Cole o resultado na variável `YOUTUBE_COOKIES_B64` no EasyPanel e faça redeploy.
+
+> Os cookies expiram com o tempo; se voltar a falhar, exporte de novo.
 
 **Como descobrir seu user ID:** fale com [@userinfobot](https://t.me/userinfobot), ou
 mande qualquer mensagem ao bot — a resposta de "acesso negado" mostra seu ID.

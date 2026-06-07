@@ -7,6 +7,7 @@
 """
 
 import asyncio
+import base64
 import logging
 import os
 import re
@@ -58,8 +59,33 @@ YOUTUBE_RE = re.compile(
 )
 
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# Cookies do YouTube (driblar o "confirm you're not a bot" em IPs de VPS).
+# Pode ser via caminho de arquivo (COOKIES_FILE) ou via conteúdo base64 (YOUTUBE_COOKIES_B64).
+COOKIES_FILE = os.getenv("COOKIES_FILE")
+_cookies_b64 = os.getenv("YOUTUBE_COOKIES_B64")
+if _cookies_b64 and not COOKIES_FILE:
+    COOKIES_FILE = str(DOWNLOAD_DIR / "cookies.txt")
+    Path(COOKIES_FILE).write_bytes(base64.b64decode(_cookies_b64))
+    logger.info("Cookies carregados de YOUTUBE_COOKIES_B64")
+
+# player_client alternativos (ex.: "android,ios,web"). Vazio = padrão do yt-dlp.
+YT_PLAYER_CLIENT = os.getenv("YT_PLAYER_CLIENT", "").replace(" ", "")
+
 # Guarda a URL pendente por usuário entre o envio do link e a escolha da qualidade.
 PENDING: dict[int, str] = {}
+
+
+def _base_opts() -> dict:
+    """Opções comuns do yt-dlp (cookies, anti-bot)."""
+    opts = {"quiet": True, "no_warnings": True, "noplaylist": True}
+    if COOKIES_FILE:
+        opts["cookiefile"] = COOKIES_FILE
+    if YT_PLAYER_CLIENT:
+        opts["extractor_args"] = {
+            "youtube": {"player_client": YT_PLAYER_CLIENT.split(",")}
+        }
+    return opts
 
 
 def restricted(func):
@@ -182,8 +208,7 @@ async def handle_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Funções síncronas de yt-dlp (rodam em thread separada)
 # --------------------------------------------------------------------------- #
 def _extract_info(url: str) -> dict:
-    opts = {"quiet": True, "no_warnings": True, "noplaylist": True}
-    with yt_dlp.YoutubeDL(opts) as ydl:
+    with yt_dlp.YoutubeDL(_base_opts()) as ydl:
         return ydl.extract_info(url, download=False)
 
 
@@ -195,14 +220,12 @@ def _download(url: str, height: int) -> tuple[Path, dict]:
     token = uuid.uuid4().hex
     outtmpl = str(DOWNLOAD_DIR / f"{token}.%(ext)s")
     opts = {
+        **_base_opts(),
         "format": (
             f"bestvideo[height<={height}]+bestaudio/best[height<={height}]"
         ),
         "outtmpl": outtmpl,
-        "noplaylist": True,
         "merge_output_format": "mp4",
-        "quiet": True,
-        "no_warnings": True,
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=True)

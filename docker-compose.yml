@@ -1,0 +1,31 @@
+# docker-compose com server Bot API LOCAL (limite de 2 GB).
+#
+# Modo simples (50 MB): comente o serviço `telegram-bot-api`, remova `depends_on`
+# e a env `TELEGRAM_API_BASE_URL` do serviço `bot`. Aí ele usa o Bot API oficial.
+
+services:
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    restart: unless-stopped
+    environment:
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+      TELEGRAM_LOCAL: 1
+    volumes:
+      - bot-api-data:/var/lib/telegram-bot-api
+    # porta 8081 fica acessível apenas na rede interna do compose
+
+  bot:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - telegram-bot-api
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      ALLOWED_USER_IDS: ${ALLOWED_USER_IDS}
+      MAX_HEIGHT: ${MAX_HEIGHT:-720}
+      TELEGRAM_API_BASE_URL: http://telegram-bot-api:8081
+      DOWNLOAD_DIR: /tmp/dl
+
+volumes:
+  bot-api-data:

@@ -36,8 +36,11 @@ logger = logging.getLogger("yt-bot")
 # Configuração via variáveis de ambiente
 # --------------------------------------------------------------------------- #
 TOKEN = os.environ["TELEGRAM_TOKEN"]
+_raw_allowed = os.getenv("ALLOWED_USER_IDS", "").replace(" ", "")
+# "*" libera o acesso para qualquer usuário.
+ALLOW_ALL = "*" in _raw_allowed.split(",")
 ALLOWED_USER_IDS = {
-    int(x) for x in os.getenv("ALLOWED_USER_IDS", "").replace(" ", "").split(",") if x
+    int(x) for x in _raw_allowed.split(",") if x and x != "*"
 }
 MAX_HEIGHT = int(os.getenv("MAX_HEIGHT", "720"))
 DOWNLOAD_DIR = Path(os.getenv("DOWNLOAD_DIR", "/tmp/dl"))
@@ -65,7 +68,7 @@ def restricted(func):
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
-        if not ALLOWED_USER_IDS or user.id not in ALLOWED_USER_IDS:
+        if not ALLOW_ALL and (not ALLOWED_USER_IDS or user.id not in ALLOWED_USER_IDS):
             logger.warning("Acesso negado para %s (%s)", user.id, user.username)
             if update.message:
                 await update.message.reply_text(
@@ -225,7 +228,10 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_quality, pattern=r"^dl:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_link))
 
-    logger.info("Bot iniciado. Allowlist: %s", ALLOWED_USER_IDS or "(vazia!)")
+    logger.info(
+        "Bot iniciado. Allowlist: %s",
+        "* (todos)" if ALLOW_ALL else (ALLOWED_USER_IDS or "(vazia!)"),
+    )
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 

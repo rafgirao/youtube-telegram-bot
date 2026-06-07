@@ -21,7 +21,7 @@ uma **allowlist de usuários**. Pronto para deploy no **EasyPanel** via Docker.
 | Variável | Obrigatória | Descrição |
 |---|---|---|
 | `TELEGRAM_TOKEN` | sim | Token do bot (via [@BotFather](https://t.me/BotFather)) |
-| `ALLOWED_USER_IDS` | sim | IDs autorizados, separados por vírgula |
+| `ALLOWED_USER_IDS` | sim | IDs autorizados, separados por vírgula. Use `*` para liberar a todos (⚠️ bot público) |
 | `MAX_HEIGHT` | não | Altura máxima oferecida (default `720`) |
 | `TELEGRAM_API_BASE_URL` | não | URL do Bot API local (ativa limite de 2 GB) |
 | `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` | só p/ server local | De [my.telegram.org](https://my.telegram.org) |

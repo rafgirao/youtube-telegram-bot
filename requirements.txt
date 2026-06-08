@@ -1,2 +1,4 @@
 python-telegram-bot==21.9
-yt-dlp==2025.5.22
+# yt-dlp sem pin: o YouTube muda as defesas com frequência e a versão mais
+# recente é a que tem mais chance de funcionar. Cada build pega a última.
+yt-dlp
